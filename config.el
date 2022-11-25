@@ -21,7 +21,7 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
+(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 13 :weight 'normal))
 ;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
@@ -74,10 +74,19 @@
 (map! "C-s" #'tim/consult-line)
 (map! "²" #'+popup/toggle)
 
-(setq projectile-globally-ignored-directories '("__build" ".cache"))
+(setq projectile-globally-ignored-directories '("__build" ".cache" "venv"))
 
 (setq tab-width 4)
+(setq typescript-indent-level 2)
 (setq c-basic-offset 2)
+
+;; deactivate project indexing on tramp remote
+;; Basically resolve the huge connection time on tramp
+(defadvice projectile-project-root (around ignore-remote first activate)
+    (unless (file-remote-p default-directory) ad-do-it))
+
+(use-package! vundo)
+(map! "C-x u" #'vundo)
 ;;; Personnal Stuf
 
 (defun tim/consult-line ()
@@ -115,7 +124,6 @@
                                 "--header-insertion=never"
                                 "--query-driver=/**/*"
                                 "--header-insertion-decorators=0"))
-
 
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
 ;;
