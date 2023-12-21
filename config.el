@@ -7,7 +7,7 @@
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
 (setq user-full-name "Timothée Bineau"
-      user-mail-address "jatimix@gmail.com")
+      user-mail-address "REDACTED_EMAIL")
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom:
 ;;
@@ -42,6 +42,8 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
 
+(setq doom-env-file "~/.doom.d/environment")
+(doom-load-envvars-file "~/.doom.d/environment")
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
@@ -74,11 +76,22 @@
 (map! "C-s" #'tim/consult-line)
 (map! "²" #'+popup/toggle)
 
-(setq projectile-globally-ignored-directories '("__build" ".cache" "venv"))
-
-(setq tab-width 4)
-(setq typescript-indent-level 2)
-(setq c-basic-offset 2)
+(setq projectile-globally-ignored-directories '("__build"
+                                                ".cache"
+                                                "venv"
+                                                ".venv"
+                                                "node_modules"
+                                                ".idea"
+                                                ".vscode"
+                                                ".git"
+                                                ".mypy_cache"
+                                                ".pytest_cache"
+                                                "build"
+                                                "dist"))
+(setq tab-width 2)
+(setq typescript-indent-level tab-width)
+(setq c-basic-offset tab-width)
+(setq js-indent-level tab-width)
 
 ;; deactivate project indexing on tramp remote
 ;; Basically resolve the huge connection time on tramp
@@ -101,17 +114,55 @@
 
 (defun tim/find-current-build-folder ()
   "Return the build folder __build in current project"
-   (when (doom-project-p)
-     (let ((compile-file (directory-files-recursively (doom-project-root) "compile_commands.json")))
-       (when compile-file
-         (file-name-directory (car compile-file))))))
+   (let* ((project-root (or (locate-dominating-file default-directory "__build")
+                            (locate-dominating-file default-directory "build")
+                            (locate-dominating-file default-directory "compile_commands.json") ; for clangd
+                            (locate-dominating-file default-directory ".clangd" ) ; for clangd
+                            (locate-dominating-file default-directory ".clang-tidy" ) ; for clang-tidy
+                            (locate-dominating-file default-directory "compile_flags.txt") ; for ccls
+                            (locate-dominating-file default-directory "compile_commands.json") ; for ccls
+                            (locate-dominating-file default-directory "compile_flags.txt") ; for ccls
+                            nil)))
+     (when project-root
+       ; the following will prevent to find the compile_commands if it's elsewhere of build/Debug
+       (let ((compile-file (directory-files-recursively (concat project-root "build/Debug") "compile_commands.json")))
+         (when compile-file
+           (file-name-directory (car compile-file)))))))
+
+(defun tim/provision-docker-container ()
+  (interactive)
+  (kill-new (with-temp-buffer
+              (insert-file-contents "/home/bineau/init_docker_bash.sh")
+              (buffer-string)))
+  (when (string-match-p "vterm.*" (buffer-name))
+    (vterm-yank)))
+
+(setq lsp-clients-clangd-executable "/home/bineau/.emacs.d/.local/etc/lsp/clangd/clangd_15.0.6/bin/clangd")
 
 (defun tim/add-compile-json-clangd-path (args)
   "Used as advice, add compile command directory in the build folder for clangd"
-  (let ((build-folder (tim/find-current-build-folder)))
+  (let ((build-folder (tramp-file-local-name (tim/find-current-build-folder))))
     (if build-folder
         `(,@args ,(concat "--compile-commands-dir=" build-folder))
       args)))
+
+(defun int-to-binary-string (i)
+  "convert an integer into it's binary representation in string format"
+  (let ((res ""))
+    (while (not (= i 0))
+      (setq res (concat (if (= 1 (logand i 1)) "1" "0") res))
+      (setq i (lsh i -1)))
+    (if (string= res "")
+        (setq res "0"))
+    res))
+
+;; (dap-register-debug-template "Rust::GDB Run Configuration"
+;;                              (list :type "gdb"
+;;                                    :request "launch"
+;;                                    :name "GDB::Run"
+;;                            :gdbpath "rust-gdb"
+;;                                    :target nil
+;;                                    :cwd nil))
 
 (advice-add 'lsp-clients--clangd-command :filter-return #'tim/add-compile-json-clangd-path)
 ;; (advice-remove 'lsp-clients--clangd-command #'tim/add-compile-json-clangd-path) ; for debug purpose
@@ -125,8 +176,154 @@
                                 "--query-driver=/**/*"
                                 "--header-insertion-decorators=0"))
 
+;; MIGHT NEED TO REMOVE THAT IN THE FUTURE AS IT MAY BE FIXED UPSTREAM
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
-;;
+;; (add-hook! 'doom-init-ui-hook
+;;            :append ;; ensure it gets added to the end.
+;;            #'(lambda () (require 'uniquify) (setq uniquify-buffer-name-style 'post-forward-angle-brackets)))
+
+(defun tim/lab--alert (msg)
+  ;; (message ">> lab.el :: %s" msg)
+  (when (require 'alert nil t)
+    (alert msg
+           :title "Gitlab"
+           :icon "/mnt/c/Users/bineau/AppData/Local/Emacs-Toast/gitlab.png"
+           :severity 'urgent)))
+
+(defun tbi/get-gdb-breakpoint ()
+  "Copy the current buffer's path to the kill ring."
+  (interactive)
+  (let ((filename (or (file-name-nondirectory (buffer-file-name)) (buffer-name)))
+        (line-number (line-number-at-pos)))
+    (let ((result (format "%s:%d" filename line-number)))
+      (kill-new result) ; Copy to kill ring
+      (message "%s" result)))) ; Display a message
+
+(map! :desc "Get the GDB breakpoint position"
+      "C-c f g" #'tbi/get-gdb-breakpoint)
+
+(use-package! lab
+  :defer t
+  :init
+  ;; Required.
+  (setq lab-host "https://gitlab.kudelski.com"
+        ;; Required.
+        ;; See the following link to learn how you can gather one for yourself:
+        ;; https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token
+        lab-token (getenv "READ_REG_TOKEN")
+        lab-git-host "https://git.kudelski.com")
+  (define-advice magit-push-current-to-pushremote (:after (&rest _) start-watching-pipeline)
+    (lab-watch-pipeline-for-last-commit))
+  (defalias 'lab--alert 'tim/lab--alert))
+
+(use-package! alert)
+
+(use-package! alert-toast
+  :init
+  (setq alert-default-style 'toast))
+
+
+;; Optional, but useful. See the variable documentation.
+;; (setq lab-group "YOUR-GROUP-ID")
+
+(after! lsp-rust
+  (setq lsp-rust-analyzer-lru-capacity 100
+        lsp-rust-analyzer-server-display-inlay-hints t
+        lsp-rust-analyzer-display-chaining-hints t
+        lsp-rust-analyzer-display-reborrow-hints t
+        lsp-rust-analyzer-display-closure-return-type-hints nil
+        lsp-rust-analyzer-display-parameter-hints t
+        lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial"
+        lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names t
+        lsp-rust-analyzer-cargo-watch-enable t
+        lsp-rust-analyzer-cargo-run-build-scripts t
+        lsp-rust-analyzer-proc-macro-enable t
+        lsp-rust-analyzer-cargo-watch-command "clippy")
+
+  (after! lsp
+    (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]cdk\\.out")
+    (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]venv\\'")
+    (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]__build\\'")
+    (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]htmlcov\\'")
+    (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\].pytest_cache\\'")
+    (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\].ruff_cache\\'")
+    (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\].pbm-build\\'")
+    (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\].gitlab-ci-local\\'"))
+
+  (after! magit
+    (setq magit-format-file-function #'magit-format-file-nerd-icons)
+    (require 'pretty-magit))
+
+  (setopt mcp-hub-servers
+          '(("github" .
+             (:command
+              "docker"
+              :args
+              ("run" "-i" "--rm" "-e" "GITHUB_PERSONAL_ACCESS_TOKEN" "ghcr.io/github/github-mcp-server")
+              :env
+              (:GITHUB_PERSONAL_ACCESS_TOKEN
+               (tbi/read-file-to-string-with-lf (file-name-concat doom-user-dir ".github_pat"))))))
+          )
+
+  (use-package! pet
+    :config
+    (add-hook 'python-base-mode-hook 'pet-mode -10))
+
+  (use-package! nix-mode)
+
+  (use-package! copilot
+  :init (setq copilot-node-executable "~/.local/share/nvm/v24.9.0/bin/node")
+  :hook (prog-mode . copilot-mode)
+  :bind (:map copilot-completion-map
+              ("<tab>" . 'copilot-accept-completion)
+              ("TAB" . 'copilot-accept-completion)
+              ("C-TAB" . 'copilot-accept-completion-by-word)
+              ("C-<tab>" . 'copilot-accept-completion-by-word)
+              ("M-<right>" . 'copilot-accept-completion-by-word)
+              ("M-f" . 'copilot-accept-completion-by-word)
+              ("C-e" . 'copilot-accept-completion-by-line)
+              ("M-n" . 'copilot-next-completion)
+              ("M-p" . 'copilot-previous-completion)))
+
+  (use-package! lsp-biome)
+  (use-package! swagg)
+  (use-package! copilot-chat)
+  (use-package! pyenv-mode)
+  (add-hook 'git-commit-setup-hook 'copilot-chat-insert-commit-message)
+
+  (defun tbi/read-file-to-string-with-lf (filepath)
+    "Read the entire content of FILEPATH into a string, replacing all line breaks with \\n."
+    (with-temp-buffer
+      (insert-file-contents filepath)
+      (let ((content (buffer-string)))
+        (replace-regexp-in-string "\r?\n" "\\\\n" content))))
+
+  (setq copilot-chat-commit-prompt (tbi/read-file-to-string-with-lf (file-name-concat doom-user-dir "commit_prompt.md")))
+
+  (defun tbi/projectile-add-known-projects (dirs)
+    "Add multiple DIRS to Projectile's known projects."
+    (interactive
+     (list (read-from-minibuffer "Enter directories (separated by space): ")))
+    (let ((dir-list (if (stringp dirs)
+                        (split-string dirs " " t)
+                      dirs)))
+      (dolist (dir dir-list)
+        (if (file-directory-p dir)
+          (projectile-add-known-project (expand-file-name dir))
+        (error "%s is not a valid dir" dir)))))
+
+  (tbi/projectile-add-known-projects '(
+                                       "~/prog/products/FragmentEmbedderEdgeGoogle"
+                                       "~/prog/products/OriginDisruptionPOC"
+                                       "~/prog/products/QMBrowserSDK"
+                                       "~/prog/products/framework"
+                                       "~/prog/products/gatekeeperapi/"
+                                       "~/prog/products/gatekeeperapi"
+                                       "~/prog/products/packer"
+                                       "~/prog/products/screen-tracking"
+                                       ))
+  (require 'dap-cpptools))
+
 ;; TO get information about any of these functions/macros, move the cursor over
 ;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
 ;; This will open documentation for it, including demos of how they are used.

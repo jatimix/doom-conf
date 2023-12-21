@@ -20,6 +20,31 @@
 ;(package! another-package
 ;  :recipe (:host github :repo "username/repo"))
 
+(package! lab
+  :recipe (:host github :repo "isamert/lab.el"))
+
+(package! lsp-biome
+  :recipe (:host github :repo "cxa/lsp-biome"))
+
+(package! alert)
+(package! alert-toast)
+
+(package! nix-mode)
+
+(package! copilot
+  :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el")))
+
+(package! copilot-chat
+  :recipe (:host github :repo "chep/copilot-chat.el" :files ("*.el" "dist")))
+
+(package! pet
+  :recipe (:host github :repo "wyuenho/emacs-pet" :files ("*.el")))
+
+(package! swagg
+  :recipe (:host github :repo "isamert/swagg.el"))
+
+(package! pyenv-mode
+  :recipe (:host github :repo "pythonic-emacs/pyenv-mode"))
 ;; If the package you are trying to install does not contain a PACKAGENAME.el
 ;; file, or is located in a subdirectory of the repo, you'll need to specify
 ;; `:files' in the `:recipe':
