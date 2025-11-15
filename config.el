@@ -43,7 +43,7 @@
 (setq org-directory "~/org/")
 
 (setq doom-env-file "~/.doom.d/environment")
-(doom-load-envvars-file "~/.doom.d/environment")
+;; (doom-load-envvars-file "~/.doom.d/environment")
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
