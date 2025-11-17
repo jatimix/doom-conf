@@ -6,8 +6,8 @@
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
-(setq user-full-name "Timothée Bineau"
-      user-mail-address "REDACTED_EMAIL")
+(setq user-full-name (string-trim (shell-command-to-string "git config --global user.name"))
+      user-mail-address (string-trim (shell-command-to-string "git config --global user.email")))
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom:
 ;;
