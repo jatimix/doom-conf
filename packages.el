@@ -36,7 +36,7 @@
   :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
   :pin "952fc7a8ae06091a46995d32ebde4380e0c71142")
 
-(package! sops :recipe (:host github :repo "djgoku/sops") :files ("*.el") :pin "7cce0d6800eff1e9c21ab43fffe1918bcc006e7d")
+(package! sops :recipe (:host github :repo "djgoku/sops" :files ("*.el")) :pin "7cce0d6800eff1e9c21ab43fffe1918bcc006e7d")
 
 (package! copilot-chat
   :recipe (:host github :repo "chep/copilot-chat.el" :files ("*.el" "dist"))
