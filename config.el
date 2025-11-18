@@ -100,10 +100,9 @@
   (unless (file-remote-p default-directory) ad-do-it))
 
 (use-package! sops
-  :bind (:map sops-map
-              ("C-c C-s" . 'sops-save-file)
-              ("C-c C-k" . 'sops-cancel)
-              ("C-c C-e" . 'sops-edit-file))
+  :bind (("C-c C-s" . sops-save-file)
+         ("C-c C-k" . sops-cancel)
+         ("C-c C-e" . sops-edit-file))
   :init (global-sops-mode 1))
 
 (use-package! vundo)
