@@ -97,7 +97,14 @@
 ;; deactivate project indexing on tramp remote
 ;; Basically resolve the huge connection time on tramp
 (defadvice projectile-project-root (around ignore-remote first activate)
-    (unless (file-remote-p default-directory) ad-do-it))
+  (unless (file-remote-p default-directory) ad-do-it))
+
+(use-package! sops
+  :bind (:map sops-map
+              ("C-c C-s" . 'sops-save-file)
+              ("C-c C-k" . 'sops-cancel)
+              ("C-c C-e" . 'sops-edit-file))
+  :init (global-sops-mode 1))
 
 (use-package! vundo)
 (map! "C-x u" #'vundo)
@@ -270,7 +277,7 @@
     :config
     (add-hook 'python-base-mode-hook 'pet-mode -10))
 
-  (use-package! nix-mode)
+  ;; (use-package! nix-mode)
 
   (use-package! copilot
   :init (setq copilot-node-executable "~/.local/share/nvm/v24.9.0/bin/node")

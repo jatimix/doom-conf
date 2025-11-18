@@ -30,11 +30,13 @@
 (package! alert :pin "79f6936ab4d85227530959811143429347a6971b")
 (package! alert-toast :pin "ba931529a266537783cfec2a28c2b8c058364ff2")
 
-(package! nix-mode :pin "719feb7868fb567ecfe5578f6119892c771ac5e5")
+;; (package! nix-mode :pin "719feb7868fb567ecfe5578f6119892c771ac5e5")
 
 (package! copilot
   :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
   :pin "952fc7a8ae06091a46995d32ebde4380e0c71142")
+
+(package! sops :recipe (:host github :repo "djgoku/sops") :files ("*.el") :pin "7cce0d6800eff1e9c21ab43fffe1918bcc006e7d")
 
 (package! copilot-chat
   :recipe (:host github :repo "chep/copilot-chat.el" :files ("*.el" "dist"))
