@@ -225,9 +225,9 @@
 
 (use-package! alert)
 
-(use-package! alert-toast
-  :init
-  (setq alert-default-style 'toast))
+;; (use-package! alert-toast
+;;   :init
+;;   (setq alert-default-style 'toast))
 
 
 ;; Optional, but useful. See the variable documentation.
@@ -259,7 +259,8 @@
 
   (after! magit
     (setq magit-format-file-function #'magit-format-file-nerd-icons)
-    (require 'pretty-magit))
+    ;; (require 'pretty-magit) ;; to fix
+    )
 
   (setopt mcp-hub-servers
           '(("github" .
@@ -319,16 +320,15 @@
           (projectile-add-known-project (expand-file-name dir))
         (error "%s is not a valid dir" dir)))))
 
-  (tbi/projectile-add-known-projects '(
-                                       "~/prog/products/FragmentEmbedderEdgeGoogle"
-                                       "~/prog/products/OriginDisruptionPOC"
-                                       "~/prog/products/QMBrowserSDK"
-                                       "~/prog/products/framework"
-                                       "~/prog/products/gatekeeperapi/"
-                                       "~/prog/products/gatekeeperapi"
-                                       "~/prog/products/packer"
-                                       "~/prog/products/screen-tracking"
-                                       ))
+  ;; (tbi/projectile-add-known-projects '(
+  ;;                                      "~/prog/products/OriginDisruptionPOC"
+  ;;                                      "~/prog/products/QMBrowserSDK"
+  ;;                                      "~/prog/products/framework"
+  ;;                                      "~/prog/products/gatekeeperapi/"
+  ;;                                      "~/prog/products/gatekeeperapi"
+  ;;                                      "~/prog/products/packer"
+  ;;                                      "~/prog/products/screen-tracking"
+  ;;                                      ))
   (require 'dap-cpptools))
 
 ;; TO get information about any of these functions/macros, move the cursor over
