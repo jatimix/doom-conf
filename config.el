@@ -247,6 +247,9 @@
         lsp-rust-analyzer-proc-macro-enable t
         lsp-rust-analyzer-cargo-watch-command "clippy")
 
+  ;; should be in "custom" but nix is not working well with that
+  (setq lsp-pyright-langserver-command "basedpyright")
+
   (after! lsp
     (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]cdk\\.out")
     (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]venv\\'")
