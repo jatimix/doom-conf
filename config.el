@@ -104,7 +104,7 @@
   (global-sops-mode 1)
   :config
   (map! :leader
-        (:prefix ("c s" . "sops")
+        (:prefix ("f s" . "sops")
          :desc "Save SOPS file" "s" #'sops-save-file
          :desc "Cancel SOPS edit" "k" #'sops-cancel
          :desc "Edit SOPS file" "e" #'sops-edit-file)))
