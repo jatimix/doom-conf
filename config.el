@@ -6,8 +6,10 @@
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
-(setq user-full-name (string-trim (shell-command-to-string "git config --global user.name"))
-      user-mail-address (string-trim (shell-command-to-string "git config --global user.email")))
+(setq user-full-name (or (string-trim (shell-command-to-string "git config --global user.name"))
+                         "Timothée")
+      user-mail-address (or (string-trim (shell-command-to-string "git config --global user.email"))
+                            "unable_to_retrieve@email.com"))
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom:
 ;;
@@ -43,8 +45,8 @@
 (setq org-directory "~/org/")
 
 (setq doom-env-file "~/.doom.d/environment")
-(if (file-exists-p "~/.doom.d/environment")
-    (doom-load-envvars-file "~/.doom.d/environment"))
+(when (file-exists-p doom-env-file)
+  (doom-load-envvars-file doom-env-file))
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
@@ -96,8 +98,10 @@
 
 ;; deactivate project indexing on tramp remote
 ;; Basically resolve the huge connection time on tramp
-(defadvice projectile-project-root (around ignore-remote first activate)
-  (unless (file-remote-p default-directory) ad-do-it))
+(advice-add 'projectile-project-root :around
+            (lambda (orig-fun &rest args)
+              (unless (file-remote-p default-directory)
+                (apply orig-fun args))))
 
 (use-package! sops
   :init
@@ -143,12 +147,12 @@
 (defun tim/provision-docker-container ()
   (interactive)
   (kill-new (with-temp-buffer
-              (insert-file-contents "/home/bineau/init_docker_bash.sh")
+              (insert-file-contents (file-name-concat doom-user-dir "init_docker_bash.sh"))
               (buffer-string)))
   (when (string-match-p "vterm.*" (buffer-name))
     (vterm-yank)))
 
-(setq lsp-clients-clangd-executable "/home/bineau/.emacs.d/.local/etc/lsp/clangd/clangd_15.0.6/bin/clangd")
+;; (setq lsp-clients-clangd-executable "/home/bineau/.emacs.d/.local/etc/lsp/clangd/clangd_15.0.6/bin/clangd")
 
 (defun tim/add-compile-json-clangd-path (args)
   "Used as advice, add compile command directory in the build folder for clangd"
@@ -186,6 +190,12 @@
                                 "--header-insertion=never"
                                 "--query-driver=/**/*"
                                 "--header-insertion-decorators=0"))
+
+(after! lsp-mode
+  (setq lsp-idle-delay 0.5
+        lsp-log-io nil
+        lsp-enable-file-watchers t
+        lsp-file-watch-threshold 5000))
 
 ;; MIGHT NEED TO REMOVE THAT IN THE FUTURE AS IT MAY BE FIXED UPSTREAM
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
@@ -285,7 +295,7 @@
   ;; (use-package! nix-mode)
 
   (use-package! copilot
-  :init (setq copilot-node-executable "~/.local/share/nvm/v24.9.0/bin/node")
+  :init (setq copilot-node-executable "node")
   :hook (prog-mode . copilot-mode)
   :bind (:map copilot-completion-map
               ("<tab>" . 'copilot-accept-completion)
@@ -295,8 +305,8 @@
               ("M-<right>" . 'copilot-accept-completion-by-word)
               ("M-f" . 'copilot-accept-completion-by-word)
               ("C-e" . 'copilot-accept-completion-by-line)
-              ("M-n" . 'copilot-next-completion)
-              ("M-p" . 'copilot-previous-completion)))
+              ("M-ç" . 'copilot-next-completion)
+              ("M-à" . 'copilot-previous-completion)))
 
   (use-package! lsp-biome)
   (use-package! swagg)
@@ -335,6 +345,7 @@
   ;;                                      "~/prog/products/screen-tracking"
   ;;                                      ))
   (require 'dap-cpptools))
+
 
 ;; TO get information about any of these functions/macros, move the cursor over
 ;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
