@@ -100,10 +100,14 @@
   (unless (file-remote-p default-directory) ad-do-it))
 
 (use-package! sops
-  :bind (("C-c C-s" . sops-save-file)
-         ("C-c C-k" . sops-cancel)
-         ("C-c C-e" . sops-edit-file))
-  :init (global-sops-mode 1))
+  :init
+  (global-sops-mode 1)
+  :config
+  (map! :leader
+        (:prefix ("c s" . "sops")
+         :desc "Save SOPS file" "s" #'sops-save-file
+         :desc "Cancel SOPS edit" "k" #'sops-cancel
+         :desc "Edit SOPS file" "e" #'sops-edit-file)))
 
 (use-package! vundo)
 (map! "C-x u" #'vundo)
@@ -248,8 +252,6 @@
         lsp-rust-analyzer-cargo-watch-command "clippy")
 
   ;; should be in "custom" but nix is not working well with that
-  (setq lsp-pyright-langserver-command "basedpyright")
-
   (after! lsp
     (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]cdk\\.out")
     (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]venv\\'")
