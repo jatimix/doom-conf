@@ -277,16 +277,16 @@
     ;; (require 'pretty-magit) ;; to fix
     )
 
-  (setopt mcp-hub-servers
-          '(("github" .
-             (:command
-              "docker"
-              :args
-              ("run" "-i" "--rm" "-e" "GITHUB_PERSONAL_ACCESS_TOKEN" "ghcr.io/github/github-mcp-server")
-              :env
-              (:GITHUB_PERSONAL_ACCESS_TOKEN
-               (tbi/read-file-to-string-with-lf (file-name-concat doom-user-dir ".github_pat"))))))
-          )
+  ;; (setopt mcp-hub-servers
+  ;;         '(("github" .
+  ;;            (:command
+  ;;             "docker"
+  ;;             :args
+  ;;             ("run" "-i" "--rm" "-e" "GITHUB_PERSONAL_ACCESS_TOKEN" "ghcr.io/github/github-mcp-server")
+  ;;             :env
+  ;;             (:GITHUB_PERSONAL_ACCESS_TOKEN
+  ;;              (tbi/read-file-to-string-with-lf (file-name-concat doom-user-dir ".github_pat"))))))
+  ;;         )
 
   (use-package! pet
     :config
@@ -312,7 +312,22 @@
   (use-package! swagg)
   (use-package! copilot-chat)
   (use-package! pyenv-mode)
+
   (add-hook 'git-commit-setup-hook 'copilot-chat-insert-commit-message)
+
+  ;; Set the correct address for device
+  ;; if you know what i mean
+  (when (s-equals? (system-name) "nagra-wsl")
+    (let* ((one "sk")
+           (onebis "i")
+           (two "del")
+           (three "ku")
+           (four "g")
+           (fourbis "he")
+           (five "com")
+           (addr (format "%s%s%s%s.%s%s.%s" three two one onebis four fourbis five))
+           (finadd (format "https://%s" addr)))
+      (setopt copilot-lsp-settings `(:github-enterprise (:uri ,finadd)))))
 
   (defun tbi/read-file-to-string-with-lf (filepath)
     "Read the entire content of FILEPATH into a string, replacing all line breaks with \\n."

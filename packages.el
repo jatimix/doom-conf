@@ -22,10 +22,10 @@
 ;  :recipe (:host github :repo "username/repo"))
 
 (package! lab
-  :recipe (:host github :repo "isamert/lab.el") :pin "91b5917cfbc77ef2f7e2af1c4f02f9706ef4a642")
+  :recipe (:host github :repo "isamert/lab.el") :pin "547d9dd773dd3747c4345cf0b9111ac0ed8c14b4")
 
 (package! lsp-biome
-  :recipe (:host github :repo "cxa/lsp-biome") :pin "145c8196c72ff889f47e084c4f70c9adbc8518f2")
+  :recipe (:host github :repo "cxa/lsp-biome") :pin "9b3d523e3df2a9f686e1b15396987a0310b62a15")
 
 (package! alert :pin "79f6936ab4d85227530959811143429347a6971b")
 (package! alert-toast :pin "ba931529a266537783cfec2a28c2b8c058364ff2")
@@ -34,22 +34,22 @@
 
 (package! copilot
   :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
-  :pin "952fc7a8ae06091a46995d32ebde4380e0c71142")
+  :pin "7ee4758bb748beac7d29e62de5d2e752ebafb858")
 
 (package! sops :recipe (:host github :repo "djgoku/sops" :files ("*.el")) :pin "7cce0d6800eff1e9c21ab43fffe1918bcc006e7d")
 
 (package! copilot-chat
   :recipe (:host github :repo "chep/copilot-chat.el" :files ("*.el" "dist"))
-  :pin "6a75b8ec1e05554abd41293acd67bfe3a99bc877")
+  :pin "753ebc4ae466c8716be8de0d169393f730c999f6")
 
 (package! pet
-  :recipe (:host github :repo "wyuenho/emacs-pet" :files ("*.el")) :pin "1f7450237549ad9850543fbc78d12f9fd375324d")
+  :recipe (:host github :repo "wyuenho/emacs-pet" :files ("*.el")) :pin "222f1da892462d7bea5c7a7bbcb6b5a5f4cb2158")
 
 (package! swagg
   :recipe (:host github :repo "isamert/swagg.el") :pin "87bd1f698bc4c77a1c0d6b252e15f4ee345d2afa")
 
 (package! pyenv-mode
-  :recipe (:host github :repo "pythonic-emacs/pyenv-mode") :pin "364bddb8f0c8ec022796210d8d3625a520e984b0")
+  :recipe (:host github :repo "pythonic-emacs/pyenv-mode") :pin "8e5128ff7f722a4d68ddaa22022cb99ef9ddcf9a")
 ;; If the package you are trying to install does not contain a PACKAGENAME.el
 ;; file, or is located in a subdirectory of the repo, you'll need to specify
 ;; `:files' in the `:recipe':
