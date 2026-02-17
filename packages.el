@@ -39,8 +39,8 @@
 (package! sops :recipe (:host github :repo "djgoku/sops" :files ("*.el")) :pin "7cce0d6800eff1e9c21ab43fffe1918bcc006e7d")
 
 (package! copilot-chat
-  :recipe (:host github :repo "chep/copilot-chat.el" :files ("*.el" "dist"))
-  :pin "753ebc4ae466c8716be8de0d169393f730c999f6")
+  :recipe (:host github :repo "jatimix/copilot-chat.el" :files ("*.el" "dist"))
+  :pin "28606d2e435a8c8d4e46a7daa3ee25a23476c839")
 
 (package! pet
   :recipe (:host github :repo "wyuenho/emacs-pet" :files ("*.el")) :pin "222f1da892462d7bea5c7a7bbcb6b5a5f4cb2158")

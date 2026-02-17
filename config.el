@@ -310,14 +310,21 @@
 
   (use-package! lsp-biome)
   (use-package! swagg)
-  (use-package! copilot-chat)
   (use-package! pyenv-mode)
 
   (add-hook 'git-commit-setup-hook 'copilot-chat-insert-commit-message)
 
+  (defun tbi/read-file-to-string-with-lf (filepath)
+    "Read the entire content of FILEPATH into a string, replacing all line breaks with \\n."
+    (with-temp-buffer
+      (insert-file-contents filepath)
+      (let ((content (buffer-string)))
+        (replace-regexp-in-string "\r?\n" "\\\\n" content))))
+
   ;; Set the correct address for device
   ;; if you know what i mean
   (when (s-equals? (system-name) "nagra-wsl")
+    (use-package! copilot-chat)
     (let* ((one "sk")
            (onebis "i")
            (two "del")
@@ -327,16 +334,8 @@
            (five "com")
            (addr (format "%s%s%s%s.%s%s.%s" three two one onebis four fourbis five))
            (finadd (format "https://%s" addr)))
+      (setq copilot-chat-commit-prompt (tbi/read-file-to-string-with-lf (file-name-concat doom-user-dir "commit_prompt.md")))
       (setopt copilot-lsp-settings `(:github-enterprise (:uri ,finadd)))))
-
-  (defun tbi/read-file-to-string-with-lf (filepath)
-    "Read the entire content of FILEPATH into a string, replacing all line breaks with \\n."
-    (with-temp-buffer
-      (insert-file-contents filepath)
-      (let ((content (buffer-string)))
-        (replace-regexp-in-string "\r?\n" "\\\\n" content))))
-
-  (setq copilot-chat-commit-prompt (tbi/read-file-to-string-with-lf (file-name-concat doom-user-dir "commit_prompt.md")))
 
   (defun tbi/projectile-add-known-projects (dirs)
     "Add multiple DIRS to Projectile's known projects."
